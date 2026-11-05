@@ -1,9 +1,11 @@
 {
   "name": "ultra-extension",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "A modular Manifest V3 browser toolbox.",
-  "scripts": { "check": "node --check background.js && node --check content/content.js && node --check popup/popup.js && node --check options/options.js && node --check newtab/newtab.js && node --check sidepanel/sidepanel.js" },
+  "description": "A developer-first Manifest V3 browser console and modular toolbox.",
+  "scripts": {
+    "check": "node --check background.js && node --check content/content.js && node --check popup/popup.js && node --check options/options.js && node --check newtab/newtab.js && node --check sidepanel/sidepanel.js && node --check devtools/devtools.js && node --check devtools/panel.js"
+  },
   "devDependencies": {},
   "license": "UNLICENSED"
 }
