@@ -19,12 +19,20 @@ chrome.runtime.onMessage.addListener((message, sender, reply) => {
     chrome.scripting.executeScript({
       target: { tabId }, world: "MAIN",
       func: async (source) => {
+        const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+        const captured = [], originals = {};
         try {
-          const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+          for (const level of ["log","info","warn","error","debug"]) {
+            originals[level] = console[level];
+            console[level] = (...args) => {
+              captured.push(level.toUpperCase()+": "+args.map(v => { try { return typeof v === "string" ? v : JSON.stringify(v, (k,x) => x instanceof Element ? x.outerHTML.slice(0,300) : x); } catch (_) { return String(v); } }).join(" "));
+              originals[level].apply(console,args);
+            };
+          }
           const result = await new AsyncFunction("$", "$$", "$x", "inspect", "copy", "clear", source)(
             (selector, root=document) => root.querySelector(selector),
             (selector, root=document) => [...root.querySelectorAll(selector)],
-            (xpath) => { const result=document.evaluate(xpath,document,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null); return Array.from({length:result.snapshotLength},(_,i)=>result.snapshotItem(i)); },
+            (xpath) => { const found=document.evaluate(xpath,document,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null); return Array.from({length:found.snapshotLength},(_,i)=>found.snapshotItem(i)); },
             (element) => { if(element instanceof Element){element.scrollIntoView({block:"center"});element.style.outline="3px solid #8ba7ff";setTimeout(()=>element.style.outline="",1800);} return element; },
             (value) => navigator.clipboard?.writeText(typeof value==="string"?value:JSON.stringify(value)),
             () => console.clear()
@@ -32,8 +40,9 @@ chrome.runtime.onMessage.addListener((message, sender, reply) => {
           let formatted;
           try { formatted = result === undefined ? "undefined" : JSON.stringify(result, (key,value) => value instanceof Element ? value.outerHTML.slice(0,500) : value, 2); }
           catch (_) { formatted = String(result); }
-          return { ok: true, result: formatted ?? String(result) };
+          return { ok: true, result: [...captured, formatted ?? String(result)].filter(Boolean).join("\n") };
         } catch (error) { return { ok: false, error: error?.stack || String(error) }; }
+        finally { for (const level of Object.keys(originals)) console[level] = originals[level]; }
       },
       args: [message.code]
     }).then(results => reply(results?.[0]?.result ?? { ok: false, error: "No result returned." }))
