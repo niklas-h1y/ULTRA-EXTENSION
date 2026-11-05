@@ -1,3 +1,2 @@
-// Optional DevTools entry point.
-// To enable: add "devtools_page": "devtools/devtools.html" to manifest.json.
-chrome.devtools.panels.create("Extension", "", "devtools/panel.html");
+/* Adds a dedicated ULTRA panel to browser DevTools. */
+chrome.devtools.panels.create("ULTRA", "", "devtools/panel.html");

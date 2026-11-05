@@ -1,5 +1,14 @@
-// Content script: runs on the URL patterns declared in manifest.json.
+/* User-invoked ULTRA page console. No arbitrary page-script evaluation. */
 (() => {
-  console.info("Extension Template content script loaded.");
-  // TODO: Add page interaction here. Avoid changing page content unnecessarily.
+  if (document.getElementById("ultra-root")) { document.getElementById("ultra-root").remove(); return; }
+  const root = document.createElement("div"); root.id = "ultra-root";
+  const win = document.createElement("section"); win.className = "ultra-window";
+  const header = document.createElement("header"); const brand = document.createElement("strong"); brand.textContent = "ULTRA / CONSOLE"; const close = document.createElement("button"); close.textContent = "Close"; header.append(brand, close);
+  const nav = document.createElement("nav"); ["help", "title", "url", "links", "headings", "count", "outline", "restore", "clear"].forEach(command => { const b = document.createElement("button"); b.textContent = command; b.addEventListener("click", () => run(command)); nav.append(b); });
+  const out = document.createElement("output"); out.setAttribute("aria-live", "polite");
+  const form = document.createElement("form"); const input = document.createElement("input"); input.placeholder = "Enter a command…"; const submit = document.createElement("button"); submit.textContent = "Run"; form.append(input, submit);
+  win.append(header, nav, out, form); root.append(win); document.documentElement.append(root);
+  function log(value) { const row = document.createElement("div"); row.textContent = typeof value === "string" ? value : JSON.stringify(value, null, 2); out.append(row); out.scrollTop = out.scrollHeight; }
+  function run(command) { try { let result; switch (command) { case "help": result = "Commands: title, url, links, headings, count, outline, restore, clear. Arbitrary JS evaluation is intentionally disabled."; break; case "title": result = document.title; break; case "url": result = location.href; break; case "links": result = [...document.links].slice(0, 50).map(a => ({ text: a.innerText.trim(), href: a.href })); break; case "headings": result = [...document.querySelectorAll("h1,h2,h3")].map(h => h.innerText.trim()); break; case "count": result = { elements: document.querySelectorAll("*").length, links: document.links.length, images: document.images.length }; break; case "outline": document.querySelectorAll("body *:not(#ultra-root):not(#ultra-root *)").forEach(el => { if (!el.dataset.ultraOldOutline) el.dataset.ultraOldOutline = el.style.outline || ""; el.style.outline = "1px solid #86a8ff"; }); result = "Outlines applied."; break; case "restore": document.querySelectorAll("[data-ultra-old-outline]").forEach(el => { el.style.outline = el.dataset.ultraOldOutline; delete el.dataset.ultraOldOutline; }); result = "Original outlines restored."; break; case "clear": out.replaceChildren(); return; default: result = "Unknown command. Type help."; } log(result); } catch (error) { log("Error: " + error.message); } }
+  close.addEventListener("click", () => root.remove()); form.addEventListener("submit", e => { e.preventDefault(); run(input.value.trim()); input.value = ""; }); log("ULTRA Console ready. Choose a command or type help.");
 })();
