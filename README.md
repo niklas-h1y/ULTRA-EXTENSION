@@ -1,35 +1,29 @@
-# Extension Template
+# ULTRA EXTENSION
 
-A minimal, cross-browser WebExtension starter using Manifest V3 and plain HTML, CSS, and JavaScript. Optional entry points are included as small examples; remove the parts your extension does not use.
+**Your browser. Your tools. Your rules.** ULTRA is a developer-first Manifest V3 toolbox. Its main feature is the ULTRA Console: a floating page-context JavaScript console plus a dedicated DevTools panel.
 
-## Quick start
+## Main feature: ULTRA Console
+- Execute user-entered JavaScript in the current page's MAIN world, including async expressions.
+- Capture `console.log/info/warn/error/debug` output from a command.
+- Console command history, multiline input, clear/minimize/close controls.
+- Helpers: `$(selector)`, `$$(selector)`, `$x(xpath)`, `inspect(element)`, `copy(value)`, `clear()`.
+- Quick DOM, URL, storage and performance inspection.
+- Dedicated DevTools panel with page evaluation, page metadata and Network HAR table.
 
-1. Edit `manifest.json` and set your extension name, version, and Firefox add-on ID.
-2. Open `chrome://extensions` (Chrome/Edge/Brave) or `about:debugging#/runtime/this-firefox` (Firefox).
-3. Enable developer mode and load this folder as an unpacked/temporary extension.
-4. Add only the permissions and host permissions your extension actually needs.
+## Other tools
+- Page Lab: reversible visual effects and reading styles.
+- Text Encoder: local Base64 and URL encoding/decoding.
+- Extension Hub: searchable, scrollable mini-tools users can enable or disable.
+- Popup, new-tab dashboard and local settings.
 
-## Structure
+## Install
+1. Open `chrome://extensions` (Chrome, Edge, Brave) or `about:debugging#/runtime/this-firefox` (Firefox).
+2. Enable developer mode and choose **Load unpacked** / **Load Temporary Add-on**.
+3. Select this repository folder.
+4. Open the toolbar popup and choose **Open Console** or **Open Workspace**.
 
-- `background.js` — service worker for events and background tasks.
-- `content/` — scripts and styles injected into matching web pages.
-- `popup/` — toolbar popup UI.
-- `options/` — settings page.
-- `newtab/` — optional custom new-tab page.
-- `sidepanel/` — optional Chromium side panel.
-- `devtools/` — optional DevTools panel.
-- `assets/icons/` — extension icons (replace the placeholders with real PNGs).
-- `lib/` — place shared or third-party libraries here.
-- `locales/` — reserved for `_locales/<locale>/messages.json` translations.
+## Console safety and browser limits
+ULTRA executes commands only after the user submits them. Page-context code has the same origin permissions as the inspected website; only run code you trust. The browser sandbox still blocks unrestricted OS control, other-app access, browser-internal pages and cross-origin data. Browser DevTools APIs are used where available; feature parity differs between browsers.
 
-## Browser notes
-
-The manifest uses Manifest V3. Chrome/Chromium generates the extension ID from the signing key; there is no standard top-level manifest `id` field. Firefox uses `browser_specific_settings.gecko.id`, which is provided as a placeholder and should be changed to a unique ID before publishing. APIs and optional features can differ by browser; check compatibility before enabling them.
-
-## Permissions
-
-The starter requests no broad host access. Add permissions such as `storage`, `tabs`, `scripting`, or `contextMenus` only when needed. Add site access under `host_permissions` (or `optional_host_permissions`) and explain why it is needed.
-
-## Packaging
-
-Load this directory directly for development. For distribution, package the extension files with `manifest.json` at the archive root. Do not include development-only files such as `.git/` or `node_modules/`.
+## Development
+Run `npm run check` with Node.js 18+ to syntax-check JavaScript. No runtime dependencies or remote code are used.

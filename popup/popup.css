@@ -1,9 +1,1 @@
-body {
-  min-width: 260px;
-  margin: 0;
-  padding: 16px;
-  color: #222;
-  font: 14px/1.5 system-ui, sans-serif;
-}
-h1 { margin: 0 0 8px; font-size: 18px; }
-button { padding: 6px 10px; cursor: pointer; }
+*{box-sizing:border-box}body{margin:0;width:340px;background:#0b1020;color:#edf2ff;font:13px/1.5 system-ui,sans-serif}main{padding:18px}header{display:flex;align-items:center;justify-content:space-between}small{color:#8faaff;font-size:9px;letter-spacing:.18em;font-weight:800}h1{font-size:34px;letter-spacing:-.06em;margin:0}h1 span{color:#89a7ff}.live{font-size:10px;color:#8ed8b0}.tagline{color:#9eabc5;margin:2px 0 16px}.quick{display:grid;grid-template-columns:1fr 1fr;gap:8px}.quick button{padding:12px 8px;border:0;border-radius:10px;background:#7897ff;color:#081022;font-weight:800;cursor:pointer}.quick button+button{background:#202d48;color:#dce6ff;border:1px solid #3b4d70}section{margin-top:20px}h2{font-size:10px;letter-spacing:.18em;color:#91a6d6}.tool{display:flex;justify-content:space-between;width:100%;padding:11px 12px;margin:6px 0;background:#121c30;color:#eaf0ff;border:1px solid #283957;border-radius:9px;text-align:left;cursor:pointer}.tool span{color:#8d9bb8;font-size:11px}footer{display:flex;justify-content:space-between;margin-top:18px;padding-top:12px;border-top:1px solid #25314a;color:#7786a5;font-size:11px}a{color:#9bb5ff;text-decoration:none}

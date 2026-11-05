@@ -1,13 +1,53 @@
-// Manifest V3 background service worker.
-// Runs only when the browser needs it; do not rely on global state persisting.
-
-chrome.runtime.onInstalled.addListener(() => {
-  console.info("Extension Template installed.");
+/* ULTRA service worker: privileged extension operations stay here. */
+const defaults = { enabledTools: ["console", "encoder", "page-lab", "reader", "focus"], theme: "midnight" };
+chrome.runtime.onInstalled.addListener(async () => {
+  const saved = await chrome.storage.local.get(defaults);
+  await chrome.storage.local.set({ ...defaults, ...saved });
+  try { chrome.contextMenus.create({ id: "ultra-open", title: "Open ULTRA", contexts: ["page"] }); } catch (_) {}
 });
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  // TODO: Handle messages from popup, options, or content scripts.
-  if (message?.type === "PING") {
-    sendResponse({ ok: true });
+chrome.runtime.onMessage.addListener((message, sender, reply) => {
+  if (message?.type === "ULTRA_STATE") { chrome.storage.local.get(defaults).then(reply); return true; }
+  if (message?.type === "ULTRA_TOOL") {
+    chrome.storage.local.get({ enabledTools: defaults.enabledTools }).then(async state => {
+      const set = new Set(state.enabledTools); message.enabled ? set.add(message.id) : set.delete(message.id);
+      const enabledTools = [...set]; await chrome.storage.local.set({ enabledTools }); reply({ enabledTools });
+    }); return true;
   }
+  if (message?.type === "ULTRA_EVAL") {
+    const tabId = sender.tab?.id;
+    if (!tabId || typeof message.code !== "string" || message.code.length > 100000) { reply({ ok: false, error: "No active tab or command too large." }); return false; }
+    chrome.scripting.executeScript({
+      target: { tabId }, world: "MAIN",
+      func: async (source) => {
+        const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+        const captured = [], originals = {};
+        try {
+          for (const level of ["log","info","warn","error","debug"]) {
+            originals[level] = console[level];
+            console[level] = (...args) => {
+              captured.push(level.toUpperCase()+": "+args.map(v => { try { return typeof v === "string" ? v : JSON.stringify(v, (k,x) => x instanceof Element ? x.outerHTML.slice(0,300) : x); } catch (_) { return String(v); } }).join(" "));
+              originals[level].apply(console,args);
+            };
+          }
+          const result = await new AsyncFunction("$", "$$", "$x", "inspect", "copy", "clear", source)(
+            (selector, root=document) => root.querySelector(selector),
+            (selector, root=document) => [...root.querySelectorAll(selector)],
+            (xpath) => { const found=document.evaluate(xpath,document,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null); return Array.from({length:found.snapshotLength},(_,i)=>found.snapshotItem(i)); },
+            (element) => { if(element instanceof Element){element.scrollIntoView({block:"center"});element.style.outline="3px solid #8ba7ff";setTimeout(()=>element.style.outline="",1800);} return element; },
+            (value) => navigator.clipboard?.writeText(typeof value==="string"?value:JSON.stringify(value)),
+            () => console.clear()
+          );
+          let formatted;
+          try { formatted = result === undefined ? "undefined" : JSON.stringify(result, (key,value) => value instanceof Element ? value.outerHTML.slice(0,500) : value, 2); }
+          catch (_) { formatted = String(result); }
+          return { ok: true, result: [...captured, formatted ?? String(result)].filter(Boolean).join("\n") };
+        } catch (error) { return { ok: false, error: error?.stack || String(error) }; }
+        finally { for (const level of Object.keys(originals)) console[level] = originals[level]; }
+      },
+      args: [message.code]
+    }).then(results => reply(results?.[0]?.result ?? { ok: false, error: "No result returned." }))
+      .catch(error => reply({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "ULTRA_PING") { reply({ ok: true }); return false; }
 });

@@ -1,4 +1,4 @@
 {
-  "extensionName": { "message": "Extension Template" },
-  "extensionDescription": { "message": "A starter template for browser extensions." }
+  "extensionName": { "message": "ULTRA EXTENSION" },
+  "extensionDescription": { "message": "A modular browser toolbox with a developer console, page lab and mini-extension hub." }
 }
