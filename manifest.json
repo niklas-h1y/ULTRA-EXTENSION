@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "ULTRA EXTENSION",
-  "version": "1.0.0",
-  "description": "A modular browser toolbox with a developer console, page lab and mini-extension hub.",
+  "version": "1.1.0",
+  "description": "A powerful browser developer console, page inspector and modular extension hub.",
   "action": { "default_title": "Open ULTRA", "default_popup": "popup/index.html" },
   "background": { "service_worker": "background.js" },
   "options_page": "options/index.html",
